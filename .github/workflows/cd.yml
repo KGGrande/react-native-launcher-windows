@@ -1,0 +1,67 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+  id-token: write
+  
+jobs:
+  build-react-native-windows:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Install node modules
+        run: yarn install
+        working-directory: ./example
+
+      - name: Run Windows x64 release build
+        run: yarn run windows
+        working-directory: ./example
+
+  publish-to-npm:
+    runs-on: ubuntu-latest
+    needs: build-react-native-windows
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org/'
+          always-auth: true
+          
+      - name: Update npm
+        run: npm i -g npm@latest   
+        
+      - name: Configure Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Release & Publish to NPM
+        run: yarn release --ci
+        env:
+          # NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # https://github.com/release-it/release-it/issues/1238
+          # Use release-it ^19 or set NODE_DEBUG
+          NODE_DEBUG: release-it:* 

@@ -21,10 +21,10 @@
   "files": [
     "src",
     "lib",
-    "android",
-    "ios",
+    "!android",
+    "!ios",
     "cpp",
-    "*.podspec",
+    "!*.podspec",
     "react-native.config.js",
     "!ios/build",
     "!android/build",
@@ -35,7 +35,8 @@
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
-    "!**/.*"
+    "!**/.*",
+    "windows"
   ],
   "scripts": {
     "example": "yarn workspace react-native-launcher-windows-example",
@@ -44,12 +45,15 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
+    "codegen": "react-native codegen-windows",
     "release": "release-it"
   },
   "keywords": [
     "react-native",
-    "ios",
-    "android"
+    "windows",
+    "react-native-windows",
+    "launcher",
+    "desktop"
   ],
   "repository": {
     "type": "git",
@@ -82,13 +86,15 @@
     "react": "19.1.0",
     "react-native": "0.81.0",
     "react-native-builder-bob": "^0.38.3",
+    "react-native-windows": "0.81.0",
     "release-it": "^17.10.0",
     "turbo": "^1.10.7",
     "typescript": "^5.2.2"
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-windows": "*"
   },
   "workspaces": [
     "example"
@@ -112,7 +118,8 @@
       "tagName": "v${version}"
     },
     "npm": {
-      "publish": true
+      "publish": true,
+      "skipChecks": true
     },
     "github": {
       "release": true
@@ -160,7 +167,6 @@
     "source": "src",
     "output": "lib",
     "targets": [
-      "codegen",
       [
         "module",
         {
@@ -192,11 +198,23 @@
     "android": {
       "javaPackageName": "com.launcherwindows"
     },
-    "includesGeneratedCode": true
+    "includesGeneratedCode": true,
+    "windows": {
+      "namespace": "ReactNativeLauncherWindowsCodegen",
+      "outputDirectory": "windows/ReactNativeLauncherWindows/codegen",
+      "separateDataTypes": true
+    }
   },
   "create-react-native-library": {
     "type": "turbo-module",
     "languages": "cpp",
     "version": "0.48.9"
+  },
+  "react-native-windows": {
+    "init-windows": {
+      "name": "ReactNativeLauncherWindows",
+      "namespace": "ReactNativeLauncherWindows",
+      "template": "cpp-lib"
+    }
   }
 }
